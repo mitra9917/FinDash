@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinDash - Personal Finance Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+            },
+            colors: {
+              cyanbrand: "#06b6d4",
+              bluebrand: "#0ea5e9",
+            },
+            boxShadow: {
+              glow: "0 0 0 1px rgba(56,189,248,.22), 0 20px 40px rgba(2,6,23,.55)",
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .glass {
+        background: linear-gradient(130deg, rgba(15, 23, 42, 0.64), rgba(2, 6, 23, 0.58));
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        backdrop-filter: blur(12px);
+      }
+
+      .bg-grid {
+        background-image:
+          radial-gradient(circle at 10% 15%, rgba(20, 184, 166, 0.28), transparent 30%),
+          radial-gradient(circle at 88% 20%, rgba(14, 165, 233, 0.24), transparent 32%),
+          radial-gradient(circle at 76% 76%, rgba(6, 182, 212, 0.2), transparent 34%),
+          linear-gradient(100deg, #020617, #031a2f 44%, #032b46 100%);
+      }
+
+    </style>
+  </head>
+  <body class="min-h-screen overflow-x-hidden bg-grid text-slate-100">
+    <div class="mx-auto w-[95%] max-w-7xl py-6 md:py-10">
+      <header class="glass rounded-3xl p-6 md:p-10 shadow-glow">
+        <p class="text-xs uppercase tracking-[0.24em] text-cyan-300">Personal Finance Visualizer</p>
+        <h1 class="mt-2 text-4xl font-extrabold leading-tight md:text-6xl">
+          Fin<span class="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">Dash</span>
+        </h1>
+        <p class="mt-4 max-w-3xl text-slate-300 md:text-lg">
+          Track income and expenses, plan smart category budgets, and get interactive insights in one clean dashboard.
+        </p>
+      </header>
+
+      <main class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <section class="glass rounded-2xl p-5 shadow-glow" aria-labelledby="transaction-title">
+          <h2 id="transaction-title" class="text-xl font-bold text-cyan-100">Add Transaction</h2>
+          <form id="transaction-form" class="mt-4 space-y-3" novalidate>
+            <div>
+              <label for="amount" class="mb-1 block text-sm text-slate-300">Amount</label>
+              <input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="e.g. 1250" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none" />
+            </div>
+            <div>
+              <label for="type" class="mb-1 block text-sm text-slate-300">Transaction Type</label>
+              <select id="type" name="type" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none">
+                <option value="">Select type</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+            <div>
+              <label for="category" class="mb-1 block text-sm text-slate-300">Category</label>
+              <input id="category" name="category" list="category-list" placeholder="Food, Rent, Travel..." required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none" />
+              <datalist id="category-list">
+                <option value="Food"></option>
+                <option value="Travel"></option>
+                <option value="Rent"></option>
+                <option value="Shopping"></option>
+                <option value="Bills"></option>
+                <option value="Salary"></option>
+                <option value="Health"></option>
+              </datalist>
+            </div>
+            <div>
+              <label for="date" class="mb-1 block text-sm text-slate-300">Date</label>
+              <input id="date" name="date" type="date" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none" />
+            </div>
+            <div>
+              <label for="paymentMode" class="mb-1 block text-sm text-slate-300">Payment Mode</label>
+              <select id="paymentMode" name="paymentMode" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none">
+                <option value="">Select mode</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="UPI">UPI</option>
+              </select>
+            </div>
+            <div>
+              <label for="notes" class="mb-1 block text-sm text-slate-300">Notes</label>
+              <input id="notes" name="notes" type="text" placeholder="Optional note" maxlength="80" class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none" />
+            </div>
+            <p id="form-error" class="min-h-5 text-sm text-rose-300" role="alert" aria-live="polite"></p>
+            <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:brightness-110">Add Transaction</button>
+          </form>
+        </section>
+
+        <section class="glass rounded-2xl p-5 shadow-glow" aria-labelledby="budget-title">
+          <h2 id="budget-title" class="text-xl font-bold text-cyan-100">Budget Planning</h2>
+          <form id="budget-form" class="mt-4 space-y-3" novalidate>
+            <div>
+              <label for="budgetCategory" class="mb-1 block text-sm text-slate-300">Category</label>
+              <input id="budgetCategory" name="budgetCategory" placeholder="e.g. Food" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none" />
+            </div>
+            <div>
+              <label for="budgetAmount" class="mb-1 block text-sm text-slate-300">Monthly Budget Amount</label>
+              <input id="budgetAmount" name="budgetAmount" type="number" step="0.01" min="0.01" required class="w-full rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none" />
+            </div>
+            <p id="budget-error" class="min-h-5 text-sm text-rose-300" role="alert" aria-live="polite"></p>
+            <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:brightness-110">Set Budget</button>
+          </form>
+          <div id="budget-list" class="mt-4 space-y-2"></div>
+        </section>
+
+        <section class="glass rounded-2xl p-5 shadow-glow lg:col-span-2" aria-labelledby="analytics-title">
+          <h2 id="analytics-title" class="text-xl font-bold text-cyan-100">Analytics Dashboard</h2>
+          <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4" id="summary-cards"></div>
+          <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div class="h-80 rounded-2xl border border-cyan-400/20 bg-slate-950/40 p-4">
+              <h3 class="mb-2 text-sm font-semibold text-slate-300">Expense Split by Category</h3>
+              <canvas id="expensePieChart" class="!h-[17.5rem] !w-full" aria-label="Expense category pie chart"></canvas>
+            </div>
+            <div class="h-80 rounded-2xl border border-cyan-400/20 bg-slate-950/40 p-4">
+              <h3 class="mb-2 text-sm font-semibold text-slate-300">Income vs Expense by Month</h3>
+              <canvas id="monthlyBarChart" class="!h-[17.5rem] !w-full" aria-label="Monthly income and expense bar chart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass rounded-2xl p-5 shadow-glow lg:col-span-2" aria-labelledby="history-title">
+          <div class="flex flex-col gap-4">
+            <h2 id="history-title" class="text-xl font-bold text-cyan-100">Transaction History</h2>
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+              <input id="searchInput" type="search" placeholder="Search category or notes" class="rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none" />
+              <select id="sortBy" class="rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none">
+                <option value="dateDesc">Sort: Date (Newest)</option>
+                <option value="dateAsc">Sort: Date (Oldest)</option>
+                <option value="amountDesc">Sort: Amount (High-Low)</option>
+                <option value="amountAsc">Sort: Amount (Low-High)</option>
+              </select>
+              <select id="timeFilter" class="rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none">
+                <option value="all">All Time</option>
+                <option value="weekly">This Week</option>
+                <option value="monthly">This Month</option>
+                <option value="custom">Custom Range</option>
+              </select>
+              <input id="startDate" type="date" disabled class="rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none disabled:opacity-45" />
+              <input id="endDate" type="date" disabled class="rounded-xl border border-cyan-400/20 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-cyan-300 focus:outline-none disabled:opacity-45" />
+            </div>
+          </div>
+
+          <div class="mt-5 overflow-x-auto rounded-2xl border border-cyan-400/20">
+            <table class="min-w-[760px] w-full text-left text-sm">
+              <thead class="bg-cyan-900/30 text-slate-300">
+                <tr>
+                  <th class="px-4 py-3">Date</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3">Category</th>
+                  <th class="px-4 py-3">Mode</th>
+                  <th class="px-4 py-3">Notes</th>
+                  <th class="px-4 py-3 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTableBody" class="divide-y divide-cyan-500/10"></tbody>
+            </table>
+          </div>
+
+          <div class="mt-4 flex items-center justify-end gap-2 text-sm">
+            <button id="prevPage" type="button" class="rounded-lg border border-cyan-300/30 bg-slate-950/50 px-3 py-1.5 text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200 disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+            <span id="pageInfo" class="text-slate-300">Page 1</span>
+            <button id="nextPage" type="button" class="rounded-lg border border-cyan-300/30 bg-slate-950/50 px-3 py-1.5 text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200 disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
